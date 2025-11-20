@@ -1,0 +1,6 @@
+[theme]
+primaryColor="#4CAF50"           # Màu chủ đạo (Primary Color): Xanh lá cây tươi (Sử dụng cho nút bấm, thanh tiến trình)
+backgroundColor="#F0FFF0"        # Màu nền (Background Color): Màu Honeydew/Trắng xanh lá cây nhạt
+secondaryBackgroundColor="#FFFFFF" # Màu nền phụ (Secondary Background Color): Trắng tinh
+textColor="#1A1A1A"              # Màu chữ (Text Color): Đen rất đậm (Tối ưu độ tương phản trên nền sáng)
+font="sans serif"

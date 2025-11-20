@@ -1,113 +1,60 @@
 # main.py
-
 import streamlit as st
-import pandas as pd
-from language_strings import STRINGS, DEFAULT_LANG, TARGET_LANGS 
-from recommender import find_best_restaurants
+from utils import get_text
+from views.map_view import render_map_tab
+from views.chatbot_view import render_chatbot_tab
 
-# --- HÀM CHỌN VÀ THIẾT LẬP NGÔN NGỮ ---
-def get_language_settings():
-    """Hiển thị menu chọn ngôn ngữ và trả về từ điển chuỗi tương ứng."""
-    
-    lang_names = {
-        'VI': 'Tiếng Việt', 'EN': 'English', 'JP': '日本語 (Nhật)',  
-        'KO': '한국어 (Hàn)', 'ZH': '中文 (Trung)',   
+st.set_page_config(page_title="Smart Restaurant Finder", layout="wide")
+
+# --- SESSION STATE INIT ---
+if "search_results" not in st.session_state: st.session_state.search_results = []
+if "center_coords" not in st.session_state: st.session_state.center_coords = None
+if "selected_place_id" not in st.session_state: st.session_state.selected_place_id = None
+if "language" not in st.session_state: st.session_state.language = "vi"
+
+# --- SIDEBAR ---
+with st.sidebar:
+    language_options = {
+        "vi": "🇻🇳 Tiếng Việt",
+        "en": "🇬🇧 English",
+        "zh": "🇨🇳 中文",
+        "ko": "🇰🇷 한국어",
+        "ja": "🇯🇵 日本語",
+        "fr": "🇫🇷 Français"
     }
     
-    available_lang_codes = list(STRINGS.keys())
-    
-    if 'lang_code' not in st.session_state:
-        st.session_state.lang_code = DEFAULT_LANG
-        
-    st.sidebar.markdown(f"**{STRINGS[DEFAULT_LANG]['lang_select']}**") 
-    new_lang_code = st.sidebar.selectbox(
-        "", 
-        options=available_lang_codes, 
-        format_func=lambda x: lang_names.get(x, x),
-        index=available_lang_codes.index(st.session_state.lang_code),
-        key='lang_selector'
+    selected_lang = st.selectbox(
+        get_text("language", st.session_state.language),
+        options=list(language_options.keys()),
+        format_func=lambda x: language_options[x],
+        index=list(language_options.keys()).index(st.session_state.language)
     )
     
-    st.session_state.lang_code = new_lang_code
+    if selected_lang != st.session_state.language:
+        st.session_state.language = selected_lang
+        st.rerun()
+
+lang = st.session_state.language
+
+if selected_lang != st.session_state.language:
+    st.session_state.language = selected_lang
     
-    return STRINGS[st.session_state.lang_code]
-
-# --- HÀM CHÍNH ---
-def main():
-    
-    lang = get_language_settings()
-    
-    st.title(lang['title'])
-    st.markdown("---")
-
-    # --- 1. GIAO DIỆN NHẬP LIỆU ---
-    user_location = st.text_input(
-        lang['location_prompt'], 
-        placeholder="VD: 21.0286, 105.8542 (Lat, Lon)"
-    )
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        # Ngân sách (Price Level)
-        budget_options = {
-            1: lang['budget_low'], 2: lang['budget_medium'], 3: lang['budget_high']
-        }
-        user_budget_level = st.select_slider(
-            lang['budget_prompt'],
-            options=[1, 2, 3],
-            format_func=lambda x: budget_options[x],
-            value=2
-        )
-
-    with col2:
-        # Khẩu vị/Loại ẩm thực
-        user_cuisine = st.selectbox(
-            lang['cuisine_prompt'],
-            options=lang['cuisine_options']
-        )
-    
-    st.markdown("---")
-
-    # --- 2. LOGIC XỬ LÝ KHI NHẤN NÚT ---
-    if st.button(lang['search_button']):
+    # Bước này loại bỏ kết quả dịch lỗi trước đó
+    if "translations_cache" in st.session_state:
+        del st.session_state.translations_cache
         
-        # 2.1. Kiểm tra và xử lý Vị trí
-        if not user_location:
-            st.error(lang['no_location_error']); return
-            
-        try:
-            lat, lon = map(float, user_location.replace(" ", "").split(','))
-        except ValueError:
-            st.error(lang['location_format_error']); return
+    st.rerun()
 
-        with st.spinner(f"Đang tìm kiếm và phân tích..."):
-            
-            # 2.2. GỌI MÔ HÌNH GỢI Ý
-            results_df = find_best_restaurants(
-                user_cuisine, user_budget_level, lat, lon
-            )
-        
-        # 2.3. HIỂN THỊ KẾT QUẢ
-        st.header(lang['result_header'])
-        
-        if results_df.empty:
-            st.warning(lang['no_results'])
-        else:
-            # Đổi tên cột cho phù hợp với ngôn ngữ hiển thị
-            display_df = results_df.rename(columns={
-                'Name': lang['result_table_name'],
-                'Cuisine': lang['result_table_cuisine'],
-                'Final_NLP_Rating': lang['result_table_rating'],
-                'Distance_km': lang['result_table_distance']
-            })
-            
-            # Định dạng lại các cột số
-            display_df[lang['result_table_rating']] = display_df[lang['result_table_rating']].round(2).astype(str) + ' ⭐'
-            display_df[lang['result_table_distance']] = display_df[lang['result_table_distance']].round(2).astype(str) + ' km'
-            
-            st.table(display_df)
+# --- MAIN INTERFACE ---
+st.title(get_text("app_title", lang))
 
+tab_map, tab_chat = st.tabs([
+    "🗺️ " + get_text("map_tab", lang),
+    "🤖 " + get_text("chatbot_tab", lang)
+])
 
-if __name__ == '__main__':
-    main()
+with tab_map:
+    render_map_tab(lang)
+
+with tab_chat:
+    render_chatbot_tab(lang)
