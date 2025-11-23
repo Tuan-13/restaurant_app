@@ -41,7 +41,8 @@ def render_map_tab(lang):
     ]
     budget_option = st.selectbox(get_text("budget", lang), budget_options_list)
 
-    radius = st.slider(get_text("radius", lang), 500, 5000, 3000)
+    # radius = st.slider(get_text("radius", lang), 500, 5000, 3000)
+    radius = 3000
         
     search_btn = st.button(get_text("search_button", lang), type="primary")
 
@@ -90,7 +91,7 @@ def render_map_tab(lang):
                         })
                 
                 processed.sort(key=lambda x: x['distance_sort'])
-                st.session_state.search_results = processed[:15]
+                st.session_state.search_results = processed[:5]
 
     # Hiển thị kết quả
     if st.session_state.center_coords and st.session_state.search_results:
@@ -140,7 +141,7 @@ def render_map_tab(lang):
                 if path:
                     folium.PolyLine(path, color="green", weight=5, opacity=0.8).add_to(m)
                     m.fit_bounds([[start_lat, start_lon], [selected_place['lat'], selected_place['lon']]])
-                    st.success(get_text("distance", lang).format(dist/1000, int(dur/60)))
+                    # st.success(get_text("distance", lang).format(dist/1000, int(dur/60)))
 
             st_folium(m, width="100%", height=600)
             
