@@ -109,7 +109,7 @@ def render_map_tab(lang):
                     c1, c2 = st.columns([3, 1])
                     with c1:
                         st.markdown(f"**{idx+1}. {r['name']}**")
-                        st.caption(f"{r['price']} | {r['cuisine']} | ~{int(r['distance_sort'])}m")
+                        # st.caption(f"{r['price']} | {r['cuisine']} | ~{int(r['distance_sort'])}m")
                     with c2:
                         if st.button(get_text("navigate", lang), key=f"btn_{r['id']}"):
                             st.session_state.selected_place_id = r['id']
