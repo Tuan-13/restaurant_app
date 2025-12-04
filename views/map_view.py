@@ -41,8 +41,7 @@ def render_map_tab(lang):
     ]
     budget_option = st.selectbox(get_text("budget", lang), budget_options_list)
 
-    # radius = st.slider(get_text("radius", lang), 500, 5000, 3000)
-    radius = 3000
+    radius = st.slider(get_text("radius", lang), 500, 5000, 3000)
         
     search_btn = st.button(get_text("search_button", lang), type="primary")
 
@@ -91,7 +90,7 @@ def render_map_tab(lang):
                         })
                 
                 processed.sort(key=lambda x: x['distance_sort'])
-                st.session_state.search_results = processed[:5]
+                st.session_state.search_results = processed[:15]
 
     # Hiển thị kết quả
     if st.session_state.center_coords and st.session_state.search_results:
