@@ -1,0 +1,98 @@
+/* NHÚNG PHÔNG CHỮ ĐẸP TỪ GOOGLE FONTS */
+@import url('https://fonts.googleapis.com/css2?family=Lobster&family=Patrick+Hand&display=swap');
+
+/* 1. NỀN TOÀN TRANG: MÀU TRẮNG */
+.stApp {
+    background-color: #FFFFFF !important;
+    background-image: none !important;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+section[data-testid="stSidebar"] {
+    background-color: #FFFFFF;
+    border-right: 1px solid #E0E0E0;
+}
+
+/* 2. CARD NHÀ HÀNG (XANH LÁ NHẠT + VIỀN ĐEN) */
+div[data-testid="stVerticalBlockBorderWrapper"] {
+    background-color: #E8F5E9 !important; 
+    border: 3px solid #000000 !important;
+    border-radius: 12px; 
+    box-shadow: 5px 5px 0px #000000;
+    padding: 20px;
+    margin-bottom: 20px;
+    transition: transform 0.2s;
+}
+
+div[data-testid="stVerticalBlockBorderWrapper"]:hover {
+    transform: translateY(-3px);
+}
+
+/* Màu chữ trong Card */
+div[data-testid="stVerticalBlockBorderWrapper"] h4, 
+div[data-testid="stVerticalBlockBorderWrapper"] h5, 
+div[data-testid="stVerticalBlockBorderWrapper"] strong {
+    color: #000000 !important;
+    font-size: 1.3rem !important;
+    font-weight: 800 !important;
+}
+
+div[data-testid="stVerticalBlockBorderWrapper"] p,
+div[data-testid="stVerticalBlockBorderWrapper"] span {
+    color: #1B5E20 !important;
+    font-weight: 500;
+}
+
+/* 3. NÚT BẤM */
+div.stButton > button {
+    background: linear-gradient(90deg, #FF512F 0%, #DD2476 100%);
+    color: white !important;
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem 2rem;
+    font-size: 1.1rem !important;
+    font-weight: bold !important;
+    text-transform: uppercase;
+    box-shadow: 0 4px 15px rgba(221, 36, 118, 0.4);
+    transition: all 0.3s;
+}
+
+div.stButton > button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 25px rgba(221, 36, 118, 0.6);
+}
+
+/* 4. INPUT FIELD */
+.stTextInput input {
+    border-radius: 10px;
+    border: 2px solid #CFD8DC;
+    padding: 12px;
+    background-color: white;
+}
+
+.stTextInput input:focus {
+    border-color: #FF512F;
+    box-shadow: 0 0 0 3px rgba(255, 81, 47, 0.2);
+}
+
+/* 5. TIÊU ĐỀ ỨNG DỤNG */
+h1 {
+    color: #D84315 !important; 
+    font-size: 4rem !important; 
+    text-align: center;
+    text-shadow: 3px 3px 0px #FFCCBC; 
+    padding-bottom: 20px;
+    margin-top: -20px;
+}
+
+/* 6. TÙY CHỈNH TAB (CHỮ TO VÀ ĐẬM) */
+div[data-testid="stTabs"] button {
+    font-size: 1.5rem !important; 
+    font-weight: 800 !important; 
+    padding: 1rem 1rem !important;
+}
+
+/* Màu chữ Tab đang chọn */
+div[data-testid="stTabs"] button[aria-selected="true"] p {
+    color: #D84315 !important;
+}

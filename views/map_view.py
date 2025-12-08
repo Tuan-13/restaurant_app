@@ -1,148 +1,81 @@
 # views/map_view.py
 import streamlit as st
-import folium
-from streamlit_folium import st_folium
-from streamlit_js_eval import get_geolocation
-from geopy.distance import geodesic
 from utils import get_text
-from services import geocode, get_restaurants_from_osm, get_route
+from osm_service import geocode, get_restaurants_from_osm
+# [MỚI] Import hàm kiểm tra từ khóa
+from search_engine import is_known_food_term
+from views.map_utils import render_settings, process_results, render_results_list, render_map
 
 def render_map_tab(lang):
-    st.header(get_text("settings", lang))
-    use_location = st.checkbox(get_text("use_current_location", lang), value=True)
-        
-    user_lat, user_lon = None, None
-    if use_location:
-        location = get_geolocation()
-        if location:
-            user_lat = location['coords']['latitude']
-            user_lon = location['coords']['longitude']
-            st.success(get_text("gps_ok", lang))
-    else:
-        city_input = st.text_input(
-            get_text("enter_location", lang), 
-            value=get_text("default_location", lang)
-        )
+    # --- GIAO DIỆN TÌM KIẾM ---
+    with st.container(border=True):
+        c1, c2 = st.columns([3, 1])
+        with c1:
+            dish_input = st.text_input(
+                get_text("what_to_eat", lang), 
+                value="", 
+                placeholder="Bánh mì, Phở, Cơm tấm...",
+                label_visibility="collapsed",
+                key="search_input_field"
+            )
+            if dish_input: st.session_state.dish_input = dish_input
 
-    dish_input = st.text_input(
-        get_text("what_to_eat", lang), 
-        value=get_text("default_dish", lang),
-        help=get_text("dish_help", lang)
-    )
-    
-    # Lưu dish_input vào session state để chatbot dùng
-    st.session_state.dish_input = dish_input
+        with c2:
+            search_btn = st.button(
+                get_text("search_button", lang), 
+                type="primary", 
+                use_container_width=True
+            )
 
-    budget_options_list = [
-        get_text("budget_all", lang),
-        get_text("budget_cheap", lang),
-        get_text("budget_medium", lang),
-        get_text("budget_expensive", lang)
-    ]
-    budget_option = st.selectbox(get_text("budget", lang), budget_options_list)
+    settings = render_settings(lang)
 
-    radius = st.slider(get_text("radius", lang), 500, 5000, 3000)
-        
-    search_btn = st.button(get_text("search_button", lang), type="primary")
-
-    # Logic tìm kiếm
+    # --- XỬ LÝ TÌM KIẾM ---
     if search_btn:
         st.session_state.selected_place_id = None
+        center_lat, center_lon = None, None
         
-        final_lat, final_lon = None, None
-        if use_location and user_lat:
-            final_lat, final_lon = user_lat, user_lon
-            st.session_state.center_coords = (user_lat, user_lon)
-        elif not use_location:
-            geo_res = geocode(city_input)
-            if geo_res:
-                final_lat, final_lon = geo_res['lat'], geo_res['lon']
-                st.session_state.center_coords = (final_lat, final_lon)
+        if settings['use_location'] and settings['user_lat']:
+            center_lat, center_lon = settings['user_lat'], settings['user_lon']
+        elif not settings['use_location']:
+            geo = geocode(settings['city_input'])
+            if geo:
+                center_lat, center_lon = geo['lat'], geo['lon']
         
-        if final_lat:
+        st.session_state.center_coords = (center_lat, center_lon)
+
+        if center_lat and dish_input:
             with st.spinner(get_text("searching", lang).format(dish_input)):
-                raw_results = get_restaurants_from_osm(final_lat, final_lon, radius, dish_input)
+                raw_results = get_restaurants_from_osm(center_lat, center_lon, settings['radius'], dish_input)
                 
-                processed = []
-                budget_map = {
-                    get_text("budget_cheap", lang): 1,
-                    get_text("budget_medium", lang): 2,
-                    get_text("budget_expensive", lang): 3
-                }
-                target_budget = budget_map.get(budget_option)
+                st.session_state.search_results = process_results(
+                    raw_results, center_lat, center_lon, settings['budget'], lang
+                )
+            
+            # [MỚI] LOGIC KIỂM TRA KẾT QUẢ RỖNG & PHẢN HỒI THÔNG MINH
+            if not st.session_state.search_results:
+                # Kiểm tra xem từ khóa có phải là món ăn đã biết không
+                if is_known_food_term(dish_input):
+                    # Trường hợp 1: Là món ăn hợp lệ nhưng không có quán nào
+                    msg = get_text("error_no_food_nearby", lang).format(dish_input)
+                    st.error(f"❌ {msg}")
+                    st.info(get_text("try_increasing_radius", lang))
+                else:
+                    # Trường hợp 2: Từ khóa rác, không phải món ăn (123, @#$, áo quần...)
+                    msg = get_text("error_invalid_query", lang).format(dish_input)
+                    st.warning(f"🤔 {msg}")
 
-                for place in raw_results:
-                    tags = place.get('tags', {})
-                    name = tags.get('name', get_text("unnamed", lang))
-                    
-                    price_lvl = (hash(name) % 3) + 1
-                    
-                    if budget_option == get_text("budget_all", lang) or price_lvl == target_budget:
-                        dist_meters = geodesic((final_lat, final_lon), (place['lat'], place['lon'])).meters
-                        
-                        processed.append({
-                            "id": place['id'],
-                            "name": name,
-                            "lat": place['lat'], "lon": place['lon'],
-                            "price": "$" * price_lvl,
-                            "cuisine": tags.get('cuisine', get_text("diverse", lang)),
-                            "distance_sort": dist_meters
-                        })
-                
-                processed.sort(key=lambda x: x['distance_sort'])
-                st.session_state.search_results = processed[:15]
+        elif not dish_input:
+            st.warning("Vui lòng nhập món ăn bạn muốn tìm!")
 
-    # Hiển thị kết quả
-    if st.session_state.center_coords and st.session_state.search_results:
-        start_lat, start_lon = st.session_state.center_coords
+    # --- HIỂN THỊ KẾT QUẢ ---
+    if st.session_state.get("center_coords") and st.session_state.get("search_results"):
         results = st.session_state.search_results
+        slat, slon = st.session_state.center_coords
         
         col_map, col_list = st.columns([2, 1])
-
+        
         with col_list:
-            st.subheader(get_text("top_results", lang).format(len(results)))
-            st.markdown("""<style>div[data-testid="stVerticalBlock"] > div > div[data-testid="stVerticalBlock"] {gap: 0.5rem;}</style>""", unsafe_allow_html=True)
-
-            for idx, r in enumerate(results):
-                with st.container(border=True):
-                    c1, c2 = st.columns([3, 1])
-                    with c1:
-                        st.markdown(f"**{idx+1}. {r['name']}**")
-                        # st.caption(f"{r['price']} | {r['cuisine']} | ~{int(r['distance_sort'])}m")
-                    with c2:
-                        if st.button(get_text("navigate", lang), key=f"btn_{r['id']}"):
-                            st.session_state.selected_place_id = r['id']
-
+            render_results_list(results, settings['mode'])
+        
         with col_map:
-            selected_place = next((item for item in results if item['id'] == st.session_state.selected_place_id), None)
-            m = folium.Map(location=[start_lat, start_lon], zoom_start=15)
-            
-            folium.Marker(
-                [start_lat, start_lon], 
-                popup=get_text("you", lang), 
-                icon=folium.Icon(color="red", icon="user")
-            ).add_to(m)
-            
-            for r in results:
-                is_active = (selected_place and r['id'] == selected_place['id'])
-                color = "green" if is_active else "blue"
-                icon_type = "star" if is_active else "cutlery"
-                folium.Marker(
-                    [r['lat'], r['lon']],
-                    tooltip=f"{r['name']} ({int(r['distance_sort'])}m)",
-                    popup=f"<b>{r['name']}</b><br>{r['cuisine']}",
-                    icon=folium.Icon(color=color, icon=icon_type)
-                ).add_to(m)
-
-            if selected_place:
-                st.info(get_text("navigation", lang).format(selected_place['name']))
-                path, dist, dur = get_route(start_lat, start_lon, selected_place['lat'], selected_place['lon'])
-                if path:
-                    folium.PolyLine(path, color="green", weight=5, opacity=0.8).add_to(m)
-                    m.fit_bounds([[start_lat, start_lon], [selected_place['lat'], selected_place['lon']]])
-                    # st.success(get_text("distance", lang).format(dist/1000, int(dur/60)))
-
-            st_folium(m, width="100%", height=600)
-            
-    elif search_btn:
-        st.warning(get_text("no_results", lang))
+            render_map(slat, slon, results, settings['mode'])

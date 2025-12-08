@@ -7,7 +7,8 @@ from utils import get_text
 def render_chatbot_tab(lang):
     c1, c2 = st.columns([3, 1])
     with c1:
-        st.title(get_text("chatbot_title", lang))
+        chatbot_title = get_text("chatbot_title", lang)
+        st.markdown(f"### {chatbot_title}")
         st.caption(get_text("chatbot_caption", lang))
     with c2:
         if st.button(get_text("clear_chat", lang), use_container_width=True):
