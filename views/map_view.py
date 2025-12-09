@@ -2,9 +2,11 @@
 import streamlit as st
 from utils import get_text
 from osm_service import geocode, get_restaurants_from_osm
-# [MỚI] Import hàm kiểm tra từ khóa
 from search_engine import is_known_food_term
-from views.map_utils import render_settings, process_results, render_results_list, render_map
+
+# [CẬP NHẬT] Thay thế import từ map_utils cũ bằng 2 file mới
+from views.map_components import render_settings, render_results_list, render_map
+from views.map_logic import process_results
 
 def render_map_tab(lang):
     # --- GIAO DIỆN TÌM KIẾM ---
@@ -47,6 +49,7 @@ def render_map_tab(lang):
             with st.spinner(get_text("searching", lang).format(dish_input)):
                 raw_results = get_restaurants_from_osm(center_lat, center_lon, settings['radius'], dish_input)
                 
+                # Gọi hàm process_results từ map_logic.py
                 st.session_state.search_results = process_results(
                     raw_results, center_lat, center_lon, settings['budget'], lang
                 )

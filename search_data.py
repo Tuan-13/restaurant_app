@@ -8,12 +8,12 @@ DISH_DATABASE = {
     # NHÓM 1: BÚN / PHỞ / MÌ (VIETNAMESE NOODLE SOUPS)
     # =========================================================================
     "phở bò": [
-        "pho bo", "beef noodle soup", "牛肉粉", 
+        "pho bo", "beef noodle soup", "beef noodle", "牛肉粉", 
         "sopa de fideos con ternera", "soupe tonkinoise au boeuf", "sopa de macarrão com carne", 
         "เฝอเนื้อ", "حساء المعكرونة بقر", "소고기 쌀국수", "牛肉フォー"
     ],
     "phở gà": [
-        "pho ga", "chicken noodle soup", "鸡肉粉", 
+        "pho ga", "chicken noodle soup", "chicken noodle", "鸡肉粉", 
         "sopa de fideos con pollo", "soupe de nouilles au poulet", "canja de galinha vietnamita", 
         "เฝอไก่", "حساء الدجاج بالشعيرية", "닭고기 쌀국수", "鶏肉フォー"
     ],
@@ -75,12 +75,12 @@ DISH_DATABASE = {
     ],
     "cơm chiên": ["com chien", "fried rice", "arroz frito", "riz cantonais", "ข้าวผัด", "أرز مقلي", "볶음밥", "チャーハン"],
     "bánh mì": [
-        "banh mi", "vietnamese sandwich", "baguette", "越式法包",
+        "banh mi", "vietnamese sandwich", "baguette", "bread", "越式法包",
         "bocadillo vietnamita", "sandwich vietnamien", "sanduíche vietnamita", 
         "บั๋นหมี่", "بان مي", "반미", "バインミー"
     ],
     "bánh xèo": [
-        "banh xeo", "vietnamese pancake", "越式煎餅",
+        "banh xeo", "vietnamese pancake", "pancake", "越式煎餅",
         "crepe vietnamita", "crêpe vietnamienne", "panqueca vietnamita", 
         "ขนมเบื้องญวน", "فطيرة فيتنامية", "반쎄오", "バインセオ"
     ],
