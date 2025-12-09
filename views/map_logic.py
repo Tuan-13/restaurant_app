@@ -2,7 +2,7 @@
 import random
 import math
 from geopy.distance import geodesic
-from utils import get_text
+from translate import get_text
 
 # --- 1. LOGIC TÍNH TOÁN VẬN TỐC & THỜI GIAN ---
 def get_velocity(mode):

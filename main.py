@@ -1,6 +1,6 @@
 # main.py
 import streamlit as st
-from utils import get_text
+from translate import get_text
 from views.map_view import render_map_tab
 from views.chatbot_view import render_chatbot_tab
 from styles import load_css

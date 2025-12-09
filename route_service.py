@@ -1,6 +1,6 @@
 # route_service.py
 import requests
-from utils import get_text # [MỚI] Import hàm dịch
+from translate import get_text # [MỚI] Import hàm dịch
 
 def get_icon_and_instruction(maneuver, road_name, lang="vi"):
     m_type = maneuver.get('type')

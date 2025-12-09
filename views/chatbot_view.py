@@ -2,7 +2,7 @@
 import streamlit as st
 from google import genai
 from google.genai import types
-from utils import get_text
+from translate import get_text
 
 # --- TỐI ƯU HÓA: Cache Client ---
 # Giúp không phải khởi tạo lại kết nối mỗi khi người dùng tương tác, làm app mượt hơn.

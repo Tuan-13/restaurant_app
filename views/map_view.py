@@ -1,6 +1,6 @@
 # views/map_view.py
 import streamlit as st
-from utils import get_text
+from translate import get_text
 from osm_service import geocode, get_restaurants_from_osm
 from search_engine import is_known_food_term
 
