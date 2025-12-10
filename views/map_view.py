@@ -5,18 +5,32 @@ from osm_service import geocode, get_restaurants_from_osm
 from search_engine import is_known_food_term
 
 # [CẬP NHẬT] Thay thế import từ map_utils cũ bằng 2 file mới
-from views.map_components import render_settings, render_results_list, render_map
+from views.map_components import render_settings, render_results_list, render_map, render_home_page
 from views.map_logic import process_results
 
 def render_map_tab(lang):
     # --- GIAO DIỆN TÌM KIẾM ---
+    # Search header
+    st.markdown("""
+    <div style="
+        text-align: center;
+        margin-bottom: 1rem;
+    ">
+        <div style="
+            font-size: 1rem;
+            color: #64748b;
+            font-weight: 500;
+        ">Bạn muốn ăn gì hôm nay?</div>
+    </div>
+    """, unsafe_allow_html=True)
+
     with st.container(border=True):
         c1, c2 = st.columns([3, 1])
         with c1:
             dish_input = st.text_input(
-                get_text("what_to_eat", lang), 
-                value="", 
-                placeholder="Bánh mì, Phở, Cơm tấm...",
+                get_text("what_to_eat", lang),
+                value="",
+                placeholder="🔍 Bánh mì, Phở, Cơm tấm, Pizza...",
                 label_visibility="collapsed",
                 key="search_input_field"
             )
@@ -24,8 +38,8 @@ def render_map_tab(lang):
 
         with c2:
             search_btn = st.button(
-                get_text("search_button", lang), 
-                type="primary", 
+                f"🔍 {get_text('search_button', lang)}",
+                type="primary",
                 use_container_width=True
             )
 
@@ -74,11 +88,14 @@ def render_map_tab(lang):
     if st.session_state.get("center_coords") and st.session_state.get("search_results"):
         results = st.session_state.search_results
         slat, slon = st.session_state.center_coords
-        
+
         col_map, col_list = st.columns([2, 1])
-        
+
         with col_list:
             render_results_list(results, settings['mode'])
-        
+
         with col_map:
             render_map(slat, slon, results, settings['mode'])
+    else:
+        # --- TRANG CHỦ KHI CHƯA TÌM KIẾM ---
+        render_home_page()

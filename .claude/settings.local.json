@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls \"C:\\Users\\peanu\\restaurant_app\"\"*.jpg 2>/dev/null || echo \"Checking files...\" && ls \"C:Userspeanurestaurant_app \")"
+    ]
+  }
+}

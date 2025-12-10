@@ -11,12 +11,42 @@ def get_genai_client(api_key):
     return genai.Client(api_key=api_key)
 
 def render_chatbot_tab(lang):
-    # 1. Giao diện Header & Nút xóa chat
-    c1, c2 = st.columns([3, 1])
-    with c1:
-        st.markdown(f"### {get_text('chatbot_title', lang)}")
-        st.caption(get_text('chatbot_caption', lang))
-    with c2:
+    # 1. Giao diện Header hiện đại
+    st.markdown(f"""
+    <div style="
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 1.5rem 2rem;
+        border-radius: 16px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    ">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+            <div>
+                <div style="
+                    font-family: 'Poppins', sans-serif;
+                    font-size: 1.5rem;
+                    font-weight: 600;
+                    color: white;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.75rem;
+                ">
+                    <span style="font-size: 1.75rem;">🤖</span>
+                    {get_text('chatbot_title', lang)}
+                </div>
+                <div style="
+                    color: rgba(255,255,255,0.8);
+                    font-size: 0.9rem;
+                    margin-top: 0.25rem;
+                ">{get_text('chatbot_caption', lang)}</div>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Nút xóa chat
+    col_spacer, col_btn = st.columns([4, 1])
+    with col_btn:
         if st.button(get_text("clear_chat", lang), use_container_width=True):
             st.session_state.gemini_messages = []
             st.rerun()
@@ -61,17 +91,42 @@ def render_chatbot_tab(lang):
     # Chỉ hiện khi chưa có lịch sử chat
     prompt = None
     if "gemini_messages" not in st.session_state:
-        st.session_state["gemini_messages"] = [] 
-        
+        st.session_state["gemini_messages"] = []
+
     if not st.session_state.gemini_messages:
-        st.info(get_text("suggestion_header", lang))
+        # Suggestion header với thiết kế mới
+        st.markdown(f"""
+        <div style="
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border: 1px solid #bae6fd;
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1rem;
+        ">
+            <div style="
+                font-weight: 600;
+                color: #0369a1;
+                margin-bottom: 0.5rem;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            ">
+                <span>💡</span> {get_text("suggestion_header", lang)}
+            </div>
+            <div style="color: #64748b; font-size: 0.85rem;">
+                Click vào gợi ý bên dưới hoặc nhập câu hỏi của bạn
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Chips với thiết kế đẹp hơn
         cols = st.columns(3)
-        if cols[0].button(get_text("chip_analyze", lang)):
+        if cols[0].button(f"📊 {get_text('chip_analyze', lang)}", use_container_width=True):
             prompt = "Dựa trên danh sách các quán tìm được, hãy phân tích ưu nhược điểm của chúng."
-        elif cols[1].button(get_text("chip_side_dish", lang)):
+        if cols[1].button(f"🍴 {get_text('chip_side_dish', lang)}", use_container_width=True):
             dish = st.session_state.get('dish_input', 'món này')
             prompt = f"Món {dish} thường ăn kèm với gì cho đúng điệu?"
-        elif cols[2].button(get_text("chip_cheapest", lang)):
+        if cols[2].button(f"💰 {get_text('chip_cheapest', lang)}", use_container_width=True):
             prompt = "Quán nào rẻ nhất và gần nhất trong danh sách?"
 
     # 6. Hiển thị Lịch sử Chat (UI)

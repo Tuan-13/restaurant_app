@@ -67,54 +67,138 @@ def render_results_list(results, mode):
     """Hiển thị danh sách quán ăn bên trái"""
     # Lấy ngôn ngữ hiện tại từ session state
     lang = st.session_state.get("language", "vi")
-    
-    st.write(f"**{get_text('top_results', lang).format(len(results))}**")
+
+    # Header kết quả với thiết kế mới
+    st.markdown(f"""
+    <div style="
+        background: linear-gradient(135deg, #4ECDC4 0%, #44A08D 100%);
+        padding: 1rem 1.25rem;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        box-shadow: 0 4px 12px rgba(78, 205, 196, 0.3);
+    ">
+        <div style="
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        ">
+            <span>📍</span> {get_text('top_results', lang).format(len(results))}
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
     st.markdown("""<style>div[data-testid="stVerticalBlock"] > div > div[data-testid="stVerticalBlock"] {gap: 0.5rem;}</style>""", unsafe_allow_html=True)
-    
+
     center_coords = st.session_state.get("center_coords")
 
     for idx, r in enumerate(results):
         is_selected = (st.session_state.selected_place_id == r['id'])
-        
+
         # --- LOGIC TÍNH KHOẢNG CÁCH & THỜI GIAN TRONG LIST ---
         if is_selected and center_coords:
-            # Nếu đang chọn: Gọi API để lấy KHOẢNG CÁCH THỰC TẾ
             path, real_dist, _, _ = get_route(
                 center_coords[0], center_coords[1], r['lat'], r['lon'], mode, lang=lang
             )
-            # Nếu lấy được API thì dùng, không thì fallback về geodesic
             final_dist = real_dist if path else r['distance_sort']
             dist_label = f"{int(final_dist)}m"
         else:
-            # Nếu chưa chọn: Dùng khoảng cách đường chim bay (Geodesic)
             final_dist = r['distance_sort']
             dist_label = f"~{int(final_dist)}m"
-        
+
         est_time_min = calculate_time_minutes(final_dist, mode)
-        time_display_str = f"{est_time_min}p"
-        
-        bg_color = "#f0f2f6" if not is_selected else "#e8f5e9"
-        border = "1px solid #ddd" if not is_selected else "2px solid #4CAF50"
-        
+        time_display_str = f"{est_time_min} phút"
+
+        # Card styling dựa trên trạng thái
+        if is_selected:
+            card_bg = "linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)"
+            card_border = "2px solid #10b981"
+            card_shadow = "0 4px 15px rgba(16, 185, 129, 0.25)"
+            number_bg = "#10b981"
+        else:
+            card_bg = "white"
+            card_border = "1px solid #e2e8f0"
+            card_shadow = "0 2px 8px rgba(0,0,0,0.06)"
+            number_bg = "linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%)"
+
         st.markdown(
             f"""
-            <div style="background-color: {bg_color}; padding: 10px; border-radius: 8px; border: {border}; margin-bottom: 8px;">
-                <div style="font-weight: bold; font-size: 1.05em;">{idx+1}. {r['name']}</div>
-                <div style="color: #555; font-size: 0.9em; margin-top: 2px;">
-                    ⭐ {r['rating']} <span style='color:#999'>({r['reviews']})</span> • 💰 {r['price']}
-                </div>
-                <div style="margin-top: 5px; font-size: 0.85em;">
-                    <span style='background:#e3f2fd; color:#1565c0; padding: 2px 6px; border-radius:4px;'>📍 {dist_label}</span>
-                    <span style='background:#fff3e0; color:#e65100; padding: 2px 6px; border-radius:4px;'>⏱️ {time_display_str}</span>
+            <div style="
+                background: {card_bg};
+                padding: 1rem;
+                border-radius: 14px;
+                border: {card_border};
+                margin-bottom: 0.75rem;
+                box-shadow: {card_shadow};
+                transition: all 0.3s ease;
+            ">
+                <div style="display: flex; align-items: flex-start; gap: 0.75rem;">
+                    <div style="
+                        background: {number_bg};
+                        color: white;
+                        width: 28px;
+                        height: 28px;
+                        border-radius: 8px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-weight: 700;
+                        font-size: 0.85rem;
+                        flex-shrink: 0;
+                    ">{idx+1}</div>
+                    <div style="flex: 1; min-width: 0;">
+                        <div style="
+                            font-weight: 600;
+                            font-size: 1rem;
+                            color: #1e293b;
+                            margin-bottom: 0.35rem;
+                            line-height: 1.3;
+                        ">{r['name']}</div>
+                        <div style="
+                            display: flex;
+                            align-items: center;
+                            gap: 0.75rem;
+                            font-size: 0.85rem;
+                            color: #64748b;
+                            margin-bottom: 0.5rem;
+                        ">
+                            <span style="display: flex; align-items: center; gap: 0.2rem;">
+                                <span style="color: #fbbf24;">★</span> {r['rating']}
+                                <span style="color: #94a3b8; font-size: 0.75rem;">({r['reviews']})</span>
+                            </span>
+                            <span>•</span>
+                            <span style="color: #10b981; font-weight: 500;">{r['price']}</span>
+                        </div>
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                            <span style="
+                                background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+                                color: #1e40af;
+                                padding: 0.25rem 0.6rem;
+                                border-radius: 20px;
+                                font-size: 0.75rem;
+                                font-weight: 600;
+                            ">📍 {dist_label}</span>
+                            <span style="
+                                background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+                                color: #92400e;
+                                padding: 0.25rem 0.6rem;
+                                border-radius: 20px;
+                                font-size: 0.75rem;
+                                font-weight: 600;
+                            ">⏱️ {time_display_str}</span>
+                        </div>
+                    </div>
                 </div>
             </div>
             """, unsafe_allow_html=True
         )
-        
+
         def select_place(pid=r['id']):
             st.session_state.selected_place_id = pid
-        
-        # Nút bấm "Đi đến quán số..."
+
         btn_label = get_text("go_to_place_btn", lang).format(idx+1)
         st.button(btn_label, key=f"btn_{r['id']}", on_click=select_place, use_container_width=True)
 
@@ -213,3 +297,79 @@ def render_map(center_lat, center_lon, results, mode):
                         st.markdown(f"<div style='text-align: right; color: gray; font-size: 0.8em;'>{step_min} min</div>", unsafe_allow_html=True)
                 
                 st.markdown("<hr style='margin: 5px 0; border-top: 1px dashed #eee;'>", unsafe_allow_html=True)
+
+
+def render_home_page():
+    """Hiển thị trang chủ khi chưa tìm kiếm - compact version"""
+
+    # Card style chung - glassmorphism
+    card_style = """
+        text-align: center;
+        padding: 1rem 0.75rem;
+        background: rgba(255, 255, 255, 0.75);
+        backdrop-filter: blur(10px);
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    """
+
+    # Feature cards - 4 cột
+    c1, c2, c3, c4 = st.columns(4)
+
+    with c1:
+        st.markdown(
+            f'''<div style="{card_style}">
+                <div style="font-size: 1.75rem; margin-bottom: 0.4rem;">📍</div>
+                <div style="font-weight: 600; color: #1e293b; font-size: 0.9rem;">Tìm quán gần nhất</div>
+                <div style="font-size: 0.75rem; color: #64748b;">Dựa trên vị trí GPS</div>
+            </div>''',
+            unsafe_allow_html=True
+        )
+
+    with c2:
+        st.markdown(
+            f'''<div style="{card_style}">
+                <div style="font-size: 1.75rem; margin-bottom: 0.4rem;">🗺️</div>
+                <div style="font-weight: 600; color: #1e293b; font-size: 0.9rem;">Chỉ đường chi tiết</div>
+                <div style="font-size: 0.75rem; color: #64748b;">Đi bộ, xe máy, ô tô</div>
+            </div>''',
+            unsafe_allow_html=True
+        )
+
+    with c3:
+        st.markdown(
+            f'''<div style="{card_style}">
+                <div style="font-size: 1.75rem; margin-bottom: 0.4rem;">💰</div>
+                <div style="font-weight: 600; color: #1e293b; font-size: 0.9rem;">Lọc theo ngân sách</div>
+                <div style="font-size: 0.75rem; color: #64748b;">Bình dân đến cao cấp</div>
+            </div>''',
+            unsafe_allow_html=True
+        )
+
+    with c4:
+        st.markdown(
+            f'''<div style="{card_style}">
+                <div style="font-size: 1.75rem; margin-bottom: 0.4rem;">🤖</div>
+                <div style="font-weight: 600; color: #1e293b; font-size: 0.9rem;">AI tư vấn</div>
+                <div style="font-size: 0.75rem; color: #64748b;">Chatbot hỗ trợ 24/7</div>
+            </div>''',
+            unsafe_allow_html=True
+        )
+
+    # Popular searches - compact
+    st.markdown(
+        '''<div style="
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 0.75rem 1.25rem;
+            margin-top: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            text-align: center;
+        ">
+            <span style="color: #ea580c; font-weight: 600;">🔥 Gợi ý:</span>
+            <span style="color: #475569;"> Phở, Bánh mì, Cơm tấm, Pizza, Cà phê, Trà sữa</span>
+        </div>''',
+        unsafe_allow_html=True
+    )
