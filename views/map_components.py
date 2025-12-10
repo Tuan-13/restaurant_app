@@ -65,8 +65,9 @@ def render_settings(lang):
 
 def render_results_list(results, mode):
     """Hiển thị danh sách quán ăn bên trái"""
-    # Lấy ngôn ngữ hiện tại từ session state
+    # Lấy ngôn ngữ và theme hiện tại từ session state
     lang = st.session_state.get("language", "vi")
+    is_dark = st.session_state.get("dark_mode", False)
 
     # Header kết quả với thiết kế mới
     st.markdown(f"""
@@ -112,17 +113,45 @@ def render_results_list(results, mode):
         est_time_min = calculate_time_minutes(final_dist, mode)
         time_display_str = f"{est_time_min} phút"
 
-        # Card styling dựa trên trạng thái
+        # Card styling dựa trên trạng thái và theme
         if is_selected:
-            card_bg = "linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)"
-            card_border = "2px solid #10b981"
+            if is_dark:
+                card_bg = "linear-gradient(135deg, #064e3b 0%, #065f46 100%)"
+                card_border = "2px solid #34d399"
+                name_color = "#f1f5f9"
+                info_color = "#94a3b8"
+            else:
+                card_bg = "linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)"
+                card_border = "2px solid #10b981"
+                name_color = "#1e293b"
+                info_color = "#64748b"
             card_shadow = "0 4px 15px rgba(16, 185, 129, 0.25)"
             number_bg = "#10b981"
         else:
-            card_bg = "white"
-            card_border = "1px solid #e2e8f0"
+            if is_dark:
+                card_bg = "#1e293b"
+                card_border = "1px solid #334155"
+                name_color = "#f1f5f9"
+                info_color = "#94a3b8"
+            else:
+                card_bg = "white"
+                card_border = "1px solid #e2e8f0"
+                name_color = "#1e293b"
+                info_color = "#64748b"
             card_shadow = "0 2px 8px rgba(0,0,0,0.06)"
             number_bg = "linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%)"
+
+        # Badge colors for dark mode
+        if is_dark:
+            dist_badge_bg = "linear-gradient(135deg, #1e3a5f 0%, #1e40af 100%)"
+            dist_badge_color = "#93c5fd"
+            time_badge_bg = "linear-gradient(135deg, #78350f 0%, #92400e 100%)"
+            time_badge_color = "#fde68a"
+        else:
+            dist_badge_bg = "linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)"
+            dist_badge_color = "#1e40af"
+            time_badge_bg = "linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)"
+            time_badge_color = "#92400e"
 
         st.markdown(
             f"""
@@ -153,7 +182,7 @@ def render_results_list(results, mode):
                         <div style="
                             font-weight: 600;
                             font-size: 1rem;
-                            color: #1e293b;
+                            color: {name_color};
                             margin-bottom: 0.35rem;
                             line-height: 1.3;
                         ">{r['name']}</div>
@@ -162,7 +191,7 @@ def render_results_list(results, mode):
                             align-items: center;
                             gap: 0.75rem;
                             font-size: 0.85rem;
-                            color: #64748b;
+                            color: {info_color};
                             margin-bottom: 0.5rem;
                         ">
                             <span style="display: flex; align-items: center; gap: 0.2rem;">
@@ -170,20 +199,20 @@ def render_results_list(results, mode):
                                 <span style="color: #94a3b8; font-size: 0.75rem;">({r['reviews']})</span>
                             </span>
                             <span>•</span>
-                            <span style="color: #10b981; font-weight: 500;">{r['price']}</span>
+                            <span style="color: {'#34d399' if is_dark else '#10b981'}; font-weight: 500;">{r['price']}</span>
                         </div>
                         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                             <span style="
-                                background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-                                color: #1e40af;
+                                background: {dist_badge_bg};
+                                color: {dist_badge_color};
                                 padding: 0.25rem 0.6rem;
                                 border-radius: 20px;
                                 font-size: 0.75rem;
                                 font-weight: 600;
                             ">📍 {dist_label}</span>
                             <span style="
-                                background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-                                color: #92400e;
+                                background: {time_badge_bg};
+                                color: {time_badge_color};
                                 padding: 0.25rem 0.6rem;
                                 border-radius: 20px;
                                 font-size: 0.75rem;
@@ -301,17 +330,40 @@ def render_map(center_lat, center_lon, results, mode):
 
 def render_home_page():
     """Hiển thị trang chủ khi chưa tìm kiếm - compact version"""
+    # Lấy trạng thái dark mode
+    is_dark = st.session_state.get("dark_mode", False)
 
-    # Card style chung - glassmorphism
-    card_style = """
-        text-align: center;
-        padding: 1rem 0.75rem;
-        background: rgba(255, 255, 255, 0.75);
-        backdrop-filter: blur(10px);
-        border-radius: 14px;
-        border: 1px solid rgba(255, 255, 255, 0.5);
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    """
+    # Card style chung - glassmorphism với dark mode support
+    if is_dark:
+        card_style = """
+            text-align: center;
+            padding: 1rem 0.75rem;
+            background: rgba(30, 41, 59, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 14px;
+            border: 1px solid rgba(51, 65, 85, 0.5);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        """
+        title_color = "#f1f5f9"
+        subtitle_color = "#94a3b8"
+        suggestion_bg = "rgba(30, 41, 59, 0.85)"
+        suggestion_border = "rgba(51, 65, 85, 0.5)"
+        suggestion_text_color = "#cbd5e1"
+    else:
+        card_style = """
+            text-align: center;
+            padding: 1rem 0.75rem;
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(10px);
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        """
+        title_color = "#1e293b"
+        subtitle_color = "#64748b"
+        suggestion_bg = "rgba(255, 255, 255, 0.7)"
+        suggestion_border = "rgba(255, 255, 255, 0.5)"
+        suggestion_text_color = "#475569"
 
     # Feature cards - 4 cột
     c1, c2, c3, c4 = st.columns(4)
@@ -320,8 +372,8 @@ def render_home_page():
         st.markdown(
             f'''<div style="{card_style}">
                 <div style="font-size: 1.75rem; margin-bottom: 0.4rem;">📍</div>
-                <div style="font-weight: 600; color: #1e293b; font-size: 0.9rem;">Tìm quán gần nhất</div>
-                <div style="font-size: 0.75rem; color: #64748b;">Dựa trên vị trí GPS</div>
+                <div style="font-weight: 600; color: {title_color}; font-size: 0.9rem;">Tìm quán gần nhất</div>
+                <div style="font-size: 0.75rem; color: {subtitle_color};">Dựa trên vị trí GPS</div>
             </div>''',
             unsafe_allow_html=True
         )
@@ -330,8 +382,8 @@ def render_home_page():
         st.markdown(
             f'''<div style="{card_style}">
                 <div style="font-size: 1.75rem; margin-bottom: 0.4rem;">🗺️</div>
-                <div style="font-weight: 600; color: #1e293b; font-size: 0.9rem;">Chỉ đường chi tiết</div>
-                <div style="font-size: 0.75rem; color: #64748b;">Đi bộ, xe máy, ô tô</div>
+                <div style="font-weight: 600; color: {title_color}; font-size: 0.9rem;">Chỉ đường chi tiết</div>
+                <div style="font-size: 0.75rem; color: {subtitle_color};">Đi bộ, xe máy, ô tô</div>
             </div>''',
             unsafe_allow_html=True
         )
@@ -340,8 +392,8 @@ def render_home_page():
         st.markdown(
             f'''<div style="{card_style}">
                 <div style="font-size: 1.75rem; margin-bottom: 0.4rem;">💰</div>
-                <div style="font-weight: 600; color: #1e293b; font-size: 0.9rem;">Lọc theo ngân sách</div>
-                <div style="font-size: 0.75rem; color: #64748b;">Bình dân đến cao cấp</div>
+                <div style="font-weight: 600; color: {title_color}; font-size: 0.9rem;">Lọc theo ngân sách</div>
+                <div style="font-size: 0.75rem; color: {subtitle_color};">Bình dân đến cao cấp</div>
             </div>''',
             unsafe_allow_html=True
         )
@@ -350,26 +402,26 @@ def render_home_page():
         st.markdown(
             f'''<div style="{card_style}">
                 <div style="font-size: 1.75rem; margin-bottom: 0.4rem;">🤖</div>
-                <div style="font-weight: 600; color: #1e293b; font-size: 0.9rem;">AI tư vấn</div>
-                <div style="font-size: 0.75rem; color: #64748b;">Chatbot hỗ trợ 24/7</div>
+                <div style="font-weight: 600; color: {title_color}; font-size: 0.9rem;">AI tư vấn</div>
+                <div style="font-size: 0.75rem; color: {subtitle_color};">Chatbot hỗ trợ 24/7</div>
             </div>''',
             unsafe_allow_html=True
         )
 
     # Popular searches - compact
     st.markdown(
-        '''<div style="
-            background: rgba(255, 255, 255, 0.7);
+        f'''<div style="
+            background: {suggestion_bg};
             backdrop-filter: blur(10px);
             border-radius: 12px;
             padding: 0.75rem 1.25rem;
             margin-top: 1rem;
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            border: 1px solid {suggestion_border};
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
             text-align: center;
         ">
             <span style="color: #ea580c; font-weight: 600;">🔥 Gợi ý:</span>
-            <span style="color: #475569;"> Phở, Bánh mì, Cơm tấm, Pizza, Cà phê, Trà sữa</span>
+            <span style="color: {suggestion_text_color};"> Phở, Bánh mì, Cơm tấm, Pizza, Cà phê, Trà sữa</span>
         </div>''',
         unsafe_allow_html=True
     )

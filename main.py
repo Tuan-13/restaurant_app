@@ -4,22 +4,26 @@ from utils.translate import get_text
 from views.map_view import render_map_tab
 from views.chatbot_view import render_chatbot_tab
 from config.styles import load_css
-   
-st.set_page_config(page_title="Smart Restaurant Finder", layout="wide")
 
-# Gọi hàm này ngay sau set_page_config
-load_css()  
+st.set_page_config(page_title="Smart Restaurant Finder", layout="wide")
 
 # --- SESSION STATE INIT ---
 if "search_results" not in st.session_state: st.session_state.search_results = []
 if "center_coords" not in st.session_state: st.session_state.center_coords = None
 if "selected_place_id" not in st.session_state: st.session_state.selected_place_id = None
 if "language" not in st.session_state: st.session_state.language = "vi"
+if "dark_mode" not in st.session_state: st.session_state.dark_mode = False
+
+# Gọi hàm này SAU khi session state được init
+load_css()
 
 # --- SIDEBAR ---
 with st.sidebar:
     # Logo và branding
-    st.markdown("""
+    is_dark_sidebar = st.session_state.get("dark_mode", False)
+    subtitle_color = "#64748b" if not is_dark_sidebar else "#94a3b8"
+
+    st.markdown(f"""
     <div style="text-align: center; padding: 1rem 0 1.5rem 0;">
         <div style="font-size: 3rem; margin-bottom: 0.5rem;">🍜</div>
         <div style="
@@ -31,18 +35,42 @@ with st.sidebar:
             -webkit-text-fill-color: transparent;
             background-clip: text;
         ">Smart Restaurant</div>
-        <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 0.25rem;">Find your perfect meal</div>
+        <div style="font-size: 0.75rem; color: {subtitle_color}; margin-top: 0.25rem;">Find your perfect meal</div>
     </div>
     """, unsafe_allow_html=True)
 
     st.divider()
 
+    # Dark mode toggle
+    is_dark = st.session_state.dark_mode
+    theme_icon = "🌙" if not is_dark else "☀️"
+    theme_label = "Dark Mode" if not is_dark else "Light Mode"
+
+    col_theme1, col_theme2 = st.columns([3, 1])
+    with col_theme1:
+        st.markdown(f"""
+        <div style="
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: {'#1e293b' if is_dark else '#64748b'};
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.25rem;
+        ">{theme_icon} Theme</div>
+        """, unsafe_allow_html=True)
+    with col_theme2:
+        if st.button("🔄", key="theme_toggle", help=f"Switch to {theme_label}"):
+            st.session_state.dark_mode = not st.session_state.dark_mode
+            st.rerun()
+
+    st.divider()
+
     # Language selector với label đẹp
-    st.markdown("""
+    st.markdown(f"""
     <div style="
         font-size: 0.75rem;
         font-weight: 600;
-        color: #64748b;
+        color: {'#1e293b' if is_dark else '#64748b'};
         text-transform: uppercase;
         letter-spacing: 0.05em;
         margin-bottom: 0.5rem;
@@ -73,12 +101,13 @@ with st.sidebar:
     st.divider()
 
     # Footer info
-    st.markdown("""
+    footer_color = "#64748b" if not is_dark else "#1e293b"
+    st.markdown(f"""
     <div style="
         position: fixed;
         bottom: 1rem;
         font-size: 0.7rem;
-        color: #94a3b8;
+        color: {footer_color};
         text-align: center;
         width: calc(100% - 2rem);
     ">
@@ -104,15 +133,19 @@ if selected_lang != st.session_state.language:
 
 # --- MAIN INTERFACE ---
 # Title với background glassmorphism
+is_dark_main = st.session_state.get("dark_mode", False)
+title_bg = "rgba(30, 41, 59, 0.85)" if is_dark_main else "rgba(255, 255, 255, 0.8)"
+title_border = "rgba(51, 65, 85, 0.5)" if is_dark_main else "rgba(255, 255, 255, 0.5)"
+
 st.markdown(f'''
 <div style="
-    background: rgba(255, 255, 255, 0.8);
+    background: {title_bg};
     backdrop-filter: blur(12px);
     border-radius: 16px;
     padding: 1rem 2rem;
     margin-bottom: 1rem;
     text-align: center;
-    border: 1px solid rgba(255, 255, 255, 0.5);
+    border: 1px solid {title_border};
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 ">
     <h1 style="

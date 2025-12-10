@@ -11,6 +11,9 @@ def get_genai_client(api_key):
     return genai.Client(api_key=api_key)
 
 def render_chatbot_tab(lang):
+    # Lấy trạng thái dark mode
+    is_dark = st.session_state.get("dark_mode", False)
+
     # 1. Giao diện Header hiện đại
     st.markdown(f"""
     <div style="
@@ -94,18 +97,23 @@ def render_chatbot_tab(lang):
         st.session_state["gemini_messages"] = []
 
     if not st.session_state.gemini_messages:
-        # Suggestion header với thiết kế mới
+        # Suggestion header với thiết kế mới - hỗ trợ dark mode
+        suggestion_bg = "linear-gradient(135deg, #1e293b 0%, #334155 100%)" if is_dark else "linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)"
+        suggestion_border = "#475569" if is_dark else "#bae6fd"
+        suggestion_title_color = "#60a5fa" if is_dark else "#0369a1"
+        suggestion_text_color = "#94a3b8" if is_dark else "#64748b"
+
         st.markdown(f"""
         <div style="
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-            border: 1px solid #bae6fd;
+            background: {suggestion_bg};
+            border: 1px solid {suggestion_border};
             border-radius: 12px;
             padding: 1rem 1.25rem;
             margin-bottom: 1rem;
         ">
             <div style="
                 font-weight: 600;
-                color: #0369a1;
+                color: {suggestion_title_color};
                 margin-bottom: 0.5rem;
                 display: flex;
                 align-items: center;
@@ -113,7 +121,7 @@ def render_chatbot_tab(lang):
             ">
                 <span>💡</span> {get_text("suggestion_header", lang)}
             </div>
-            <div style="color: #64748b; font-size: 0.85rem;">
+            <div style="color: {suggestion_text_color}; font-size: 0.85rem;">
                 Click vào gợi ý bên dưới hoặc nhập câu hỏi của bạn
             </div>
         </div>
