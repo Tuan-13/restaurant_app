@@ -6,7 +6,7 @@ from unidecode import unidecode
 import re
 
 # [MỚI] Import Search Engine
-from search_engine import expand_search_query_smart, normalize_text
+from services.search_engine import expand_search_query_smart, normalize_text
 
 def geocode(q: str):
     g = Nominatim(user_agent="my_food_app_v4_multi_search") 

@@ -1,7 +1,7 @@
 # utils.py
 import streamlit as st
 from deep_translator import GoogleTranslator
-from config import BASE_TEXTS
+from config.config import BASE_TEXTS
 
 # --- DỊCH THUẬT CƠ BẢN ---
 @st.cache_resource

@@ -1,6 +1,6 @@
 # search_engine.py
 from unidecode import unidecode
-from search_data import DISH_DATABASE, CATEGORY_MAPPINGS
+from utils.search_data import DISH_DATABASE, CATEGORY_MAPPINGS
 
 def normalize_text(text):
     if not text: return ""

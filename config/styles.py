@@ -13,9 +13,10 @@ def load_css(file_name="style.css"):
     Hàm đọc file CSS và inject vào Streamlit.
     Đồng thời inject background image dưới dạng base64.
     """
-    base_dir = os.path.dirname(__file__)
-    css_path = os.path.join(base_dir, file_name)
-    bg_path = os.path.join(base_dir, "background.jpg")
+    base_dir = os.path.dirname(os.path.dirname(__file__))  # Go up to project root
+    assets_dir = os.path.join(base_dir, "assets")
+    css_path = os.path.join(assets_dir, file_name)
+    bg_path = os.path.join(assets_dir, "background.jpg")
 
     try:
         # Đọc CSS

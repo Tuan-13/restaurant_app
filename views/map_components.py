@@ -7,8 +7,8 @@ from streamlit_js_eval import get_geolocation
 import math
 
 # Import các module nội bộ
-from translate import get_text
-from route_service import get_route
+from utils.translate import get_text
+from services.route_service import get_route
 # Import logic từ file mới tách
 from views.map_logic import calculate_time_minutes
 

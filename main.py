@@ -1,9 +1,9 @@
 # main.py
 import streamlit as st
-from translate import get_text
+from utils.translate import get_text
 from views.map_view import render_map_tab
 from views.chatbot_view import render_chatbot_tab
-from styles import load_css
+from config.styles import load_css
    
 st.set_page_config(page_title="Smart Restaurant Finder", layout="wide")
 

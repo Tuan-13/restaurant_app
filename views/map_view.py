@@ -1,8 +1,8 @@
 # views/map_view.py
 import streamlit as st
-from translate import get_text
-from osm_service import geocode, get_restaurants_from_osm
-from search_engine import is_known_food_term
+from utils.translate import get_text
+from services.osm_service import geocode, get_restaurants_from_osm
+from services.search_engine import is_known_food_term
 
 # [CẬP NHẬT] Thay thế import từ map_utils cũ bằng 2 file mới
 from views.map_components import render_settings, render_results_list, render_map, render_home_page
