@@ -14,7 +14,7 @@ if "selected_place_id" not in st.session_state: st.session_state.selected_place_
 if "language" not in st.session_state: st.session_state.language = "vi"
 if "dark_mode" not in st.session_state: st.session_state.dark_mode = False
 
-# Gọi hàm này SAU khi session state được init
+
 load_css()
 
 # --- SIDEBAR ---
@@ -65,7 +65,7 @@ with st.sidebar:
 
     st.divider()
 
-    # Language selector với label đẹp
+    # Language selector 
     st.markdown(f"""
     <div style="
         font-size: 0.75rem;
@@ -125,14 +125,12 @@ lang = st.session_state.language
 if selected_lang != st.session_state.language:
     st.session_state.language = selected_lang
     
-    # Bước này loại bỏ kết quả dịch lỗi trước đó
     if "translations_cache" in st.session_state:
         del st.session_state.translations_cache
         
     st.rerun()
 
 # --- MAIN INTERFACE ---
-# Title với background glassmorphism
 is_dark_main = st.session_state.get("dark_mode", False)
 title_bg = "rgba(30, 41, 59, 0.85)" if is_dark_main else "rgba(255, 255, 255, 0.8)"
 title_border = "rgba(51, 65, 85, 0.5)" if is_dark_main else "rgba(255, 255, 255, 0.5)"

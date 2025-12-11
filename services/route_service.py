@@ -1,13 +1,12 @@
 # route_service.py
 import requests
-from utils.translate import get_text # [MỚI] Import hàm dịch
+from utils.translate import get_text 
 
 def get_icon_and_instruction(maneuver, road_name, lang="vi"):
     m_type = maneuver.get('type')
     modifier = maneuver.get('modifier')
-    road = road_name if road_name else get_text("unnamed", lang) # Hoặc để trống tùy ý
+    road = road_name if road_name else get_text("unnamed", lang) 
     
-    # Mapping hướng sang Key trong config
     mapping = {
         "left": ("⬅️", "nav_left"),
         "right": ("➡️", "nav_right"),
@@ -32,7 +31,7 @@ def get_icon_and_instruction(maneuver, road_name, lang="vi"):
     elif m_type == "fork":
         if modifier in mapping:
             icon = mapping[modifier][0]
-            dir_text = mapping[modifier][0] # Icon mũi tên làm hướng
+            dir_text = mapping[modifier][0]
             instruction = get_text("nav_fork", lang).format(dir_text, road)
     elif m_type == "end of road":
         if modifier in mapping:
@@ -41,7 +40,6 @@ def get_icon_and_instruction(maneuver, road_name, lang="vi"):
             instruction = get_text("nav_end_of_road", lang).format(dir_text, road)
     elif modifier in mapping:
         icon = mapping[modifier][0]
-        # Gọi get_text với key tương ứng và format đường vào
         instruction = get_text(mapping[modifier][1], lang).format(road)
     
     return icon, instruction
@@ -67,7 +65,6 @@ def get_route(start_lat, start_lon, end_lat, end_lon, mode="driving", lang="vi")
             maneuver = step.get('maneuver', {})
             road_name = step.get('name', '')
             
-            # [MỚI] Truyền lang vào đây
             icon, instruction = get_icon_and_instruction(maneuver, road_name, lang)
             
             steps_data.append({

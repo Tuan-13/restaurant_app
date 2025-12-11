@@ -4,8 +4,6 @@ import streamlit as st
 from geopy.geocoders import Nominatim
 from unidecode import unidecode
 import re
-
-# [MỚI] Import Search Engine
 from services.search_engine import expand_search_query_smart, normalize_text
 
 def geocode(q: str):
@@ -23,20 +21,17 @@ def check_strict_match(text, keywords):
     Logic: Tìm exact match cho từ ngắn, partial match cho từ dài.
     """
     if not text: return False
-    text_norm = normalize_text(str(text)) # Dùng hàm chuẩn hóa từ search_engine
+    text_norm = normalize_text(str(text)) 
     
     for kw in keywords:
         kw_clean = normalize_text(kw)
         if not kw_clean: continue
         
-        # Nếu từ khóa quá ngắn (ví dụ "ốc"), bắt buộc phải match đúng ranh giới từ (word boundary)
-        # để tránh match nhầm "bò hóc", "tốc độ"
         if len(kw_clean) <= 2:
             pattern = r"\b" + re.escape(kw_clean) + r"\b"
             if re.search(pattern, text_norm):
                 return True
         else:
-            # Từ dài thì chỉ cần chứa trong chuỗi là được
             if kw_clean in text_norm:
                 return True
     return False
@@ -45,16 +40,13 @@ def check_strict_match(text, keywords):
 def get_restaurants_from_osm(lat, lon, radius, user_query):
     overpass_url = "http://overpass-api.de/api/interpreter"
     
-    # [MỚI] GỌI HÀM TÌM KIẾM THÔNG MINH
     search_keywords = expand_search_query_smart(user_query)
     
-    # Ghép lại thành chuỗi Regex cho OSM (cách nhau bởi dấu |)
     search_term_osm = "|".join(search_keywords)
 
     food_amenities = "restaurant|fast_food|cafe|bar|pub|ice_cream|food_court|street_vendor|biergarten"
     food_shops = "bakery|pastry|beverages|food|convenience|deli|greengrocer|seafood|supermarket|mall"
 
-    # Query OSM
     ql_query = f"""
     [out:json][timeout:60];
     (
@@ -95,16 +87,14 @@ def get_restaurants_from_osm(lat, lon, radius, user_query):
                 cuisine = tags.get('cuisine', '')
                 dish = tags.get('dish', '')
 
-                # Logic kiểm tra 2 lớp:
-                # 1. Kiểm tra xem Cuisine/Dish có chứa từ khóa không (Ưu tiên)
+                # 1. Kiểm tra xem Cuisine/Dish có chứa từ khóa không 
                 is_match = False
                 for kw in search_keywords:
-                    # So sánh tương đối đơn giản cho tags cuisine (thường là tiếng Anh)
                     if kw.lower() in cuisine.lower() or kw.lower() in dish.lower():
                         is_match = True
                         break
                 
-                # 2. Nếu chưa match, kiểm tra kỹ tên quán (Name)
+                # 2. Nếu chưa match, kiểm tra kỹ tên quán 
                 if not is_match:
                     if check_strict_match(name, search_keywords):
                         is_match = True

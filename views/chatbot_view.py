@@ -1,5 +1,6 @@
 # views/chatbot_view.py
 import streamlit as st
+import time
 from google import genai
 from google.genai import types
 from utils.translate import get_text
@@ -64,6 +65,42 @@ def render_chatbot_tab(lang):
         st.warning(get_text("no_api_key", lang))
         client = None
 
+    # Rate limit state (per-session simple limiter)
+    # Limits provided by user: RPM=10, RPD=20
+    RPM = 10
+    RPD = 20
+    now = int(time.time())
+    minute_window = now // 60
+    day_window = now // 86400
+
+    if 'chat_rate' not in st.session_state:
+        st.session_state['chat_rate'] = {
+            'minute_window': minute_window,
+            'minute_count': 0,
+            'day_window': day_window,
+            'day_count': 0
+        }
+
+    def check_rate_limit():
+        rs = st.session_state['chat_rate']
+        # minute reset
+        if rs['minute_window'] != minute_window:
+            rs['minute_window'] = minute_window
+            rs['minute_count'] = 0
+        if rs['day_window'] != day_window:
+            rs['day_window'] = day_window
+            rs['day_count'] = 0
+
+        if rs['minute_count'] >= RPM:
+            return False, f"Quota vượt quá: chỉ cho phép {RPM} yêu cầu/phút. Vui lòng chờ vài giây."
+        if rs['day_count'] >= RPD:
+            return False, f"Quota ngày đã đầy: chỉ cho phép {RPD} yêu cầu/ngày. Hãy thử lại ngày mai."
+
+        # increment counters (will assume request proceeds)
+        rs['minute_count'] += 1
+        rs['day_count'] += 1
+        return True, None
+
     # 3. Chuẩn bị Context (Dữ liệu quán ăn)
     # Logic: Chỉ lấy Top 5 quán để đưa vào ngữ cảnh -> Tiết kiệm Token đầu vào
     search_context = ""
@@ -79,15 +116,24 @@ def render_chatbot_tab(lang):
         search_context = "\n(Người dùng chưa tìm kiếm quán nào trên bản đồ)."
 
     # 4. Xây dựng System Prompt (Hướng dẫn hành vi)
-    # LƯU Ý: Gemma-3 không hỗ trợ system_instruction trong config, nên ta phải gộp vào text này.
+    # Chúng ta gộp hướng dẫn hành vi vào một "system-like" message để model hiểu bối cảnh.
     system_prompt_text = f"""
-    ROLE: Bạn là "Foodie Guide" - Trợ lý ẩm thực địa phương am hiểu Việt Nam.
+    ROLE: Bạn là "Foodie Guide" - một trợ lý ẩm thực địa phương chuyên nghiệp, thân thiện, hiểu văn hóa ẩm thực Việt Nam.
     CONTEXT: {search_context}
-    INSTRUCTION:
-    - Trả lời ngắn gọn, thân thiện, dùng emoji 🍜.
-    - Nếu có dữ liệu tìm kiếm, hãy ưu tiên tư vấn từ danh sách đó.
-    - Nếu không có dữ liệu, hãy tư vấn dựa trên kiến thức chung về ẩm thực.
-    - Định dạng câu trả lời bằng Markdown dễ đọc.
+
+    INSTRUCTIONS (HÀNH VI):
+    1) Ưu tiên dữ liệu từ CONTEXT nếu có: khi người dùng hỏi về quán trong danh sách, hãy trích dẫn tên, khoảng cách, ước lượng thời gian, và ưu/nhược điểm.
+    2) Nếu câu hỏi không rõ ràng, đặt tối đa 2 câu hỏi làm rõ.
+    3) Trả lời chi tiết, có cấu trúc: mở đầu ngắn (1-2 câu), phần chính dưới dạng bullet/pairs (ưu nhược/so sánh), phần kết là khuyến nghị và hành động tiếp theo.
+    4) Cung cấp một dòng "Tóm tắt:" ngắn gọn ở đầu, và đề xuất 2 phương án tiếp theo (ví dụ: gọi, đến trực tiếp, xem bản đồ).
+    5) Ngôn ngữ trả lời: theo `lang` (nếu `vi` thì tiếng Việt). Dùng emoji vừa phải để làm rõ.
+    6) Không xuất API keys, thông tin nhạy cảm; nếu cần API key để hành động, hướng dẫn người dùng cách cấu hình `.streamlit/secrets.toml`.
+    7) Khi trả lời, nếu có thể, thêm `ESTIMATED_DISTANCE` và `ESTIMATED_TRAVEL_TIME` dựa trên context (m nếu <1000, km nếu >1000) và ước lượng phút.
+
+    FORMAT INSTRUCTION:
+    - Bắt đầu bằng một dòng "Tóm tắt:"
+    - Dùng tiêu đề/đoạn ngắn + bullet points
+    - Kết thúc bằng: "Gợi ý tiếp theo:" với 2 lựa chọn hành động.
     """
 
     # 5. Giao diện Suggestion Chips (Gợi ý câu hỏi)
@@ -122,7 +168,7 @@ def render_chatbot_tab(lang):
                 <span>💡</span> {get_text("suggestion_header", lang)}
             </div>
             <div style="color: {suggestion_text_color}; font-size: 0.85rem;">
-                Click vào gợi ý bên dưới hoặc nhập câu hỏi của bạn
+                {get_text('suggestion_hint', lang)}
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -156,7 +202,7 @@ def render_chatbot_tab(lang):
     # 8. Logic Gửi tin nhắn & Gọi API
     if final_prompt:
         if not client:
-            st.error("Vui lòng cấu hình GOOGLE_AI_API_KEY trong .streamlit/secrets.toml")
+            st.error(get_text('please_config_api', lang))
             return
 
         # A. Hiển thị & Lưu tin nhắn User
@@ -189,23 +235,34 @@ def render_chatbot_tab(lang):
                 # B4. Ghép thành danh sách gửi API: [Luật chơi] + [Lịch sử ngắn] + [Câu hỏi mới]
                 messages_to_send = [sys_msg] + history + [user_msg_obj]
 
-                # B5. Gọi API Streaming
-                # Model gemma-3-27b-it có Quota rất cao (14.4k req/ngày)
+                # B5. Kiểm tra rate limit trước khi gọi API
+                allowed, reason = check_rate_limit()
+                if not allowed:
+                    message_placeholder.error(reason)
+                    return
+
+                # B6. Gọi API Streaming với model yêu cầu
                 response = client.models.generate_content_stream(
-                    model="gemma-3-27b-it", 
+                    model="gemini-2.5-flash-lite",
                     contents=messages_to_send,
                     config=types.GenerateContentConfig(
-                        temperature=0.7,
-                        max_output_tokens=1500, # Giới hạn độ dài câu trả lời
-                        # QUAN TRỌNG: Không được để system_instruction ở đây!
+                        temperature=0.3,
+                        max_output_tokens=800,
                     )
                 )
-                    
+
+                # Stream kết quả về UI
                 for chunk in response:
-                    if chunk.text:
-                        full_response += chunk.text
+                    # Một số chunk có cấu trúc khác nhau; lấy text an toàn
+                    text = getattr(chunk, 'text', None)
+                    if not text and hasattr(chunk, 'delta'):
+                        text = getattr(chunk.delta, 'content', None)
+                    if text:
+                        full_response += text
+                        # Hiển thị con trỏ khi stream
                         message_placeholder.markdown(full_response + "▌")
-                    
+
+                # Hoàn tất hiển thị
                 message_placeholder.markdown(full_response)
                 
                 # C. Lưu câu trả lời của Bot vào lịch sử
@@ -218,6 +275,6 @@ def render_chatbot_tab(lang):
                 if "429" in error_msg:
                     st.error("Hệ thống đang bận (Quá tải Quota). Vui lòng đợi 1 phút.")
                 elif "404" in error_msg:
-                    st.error(f"Lỗi Model: Không tìm thấy model gemma-3-27b-it. Hãy kiểm tra lại tên model.")
+                    st.error(f"Lỗi Model: Không tìm thấy model gemini-2.5-flash-lite. Hãy kiểm tra lại tên model.")
                 else:
                     st.error(f"Đã xảy ra lỗi: {e}")
