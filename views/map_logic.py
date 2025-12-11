@@ -8,7 +8,7 @@ from utils.translate import get_text
 def get_velocity(mode):
     """Trả về vận tốc (m/s) theo chế độ di chuyển"""
     if mode == "walking": return 1.2      # ~4.3 km/h
-    elif mode == "bicycling": return 3.5  # ~12.6 km/h
+    elif mode == "bicycling" or mode == "cycling": return 3.5  # ~12.6 km/h
     else: return 7.0                      # ~25 km/h (Vận tốc trung bình trong phố)
 
 def calculate_time_minutes(distance_meters, mode):

@@ -40,7 +40,7 @@ def render_settings(lang):
             travel_modes = {
                 get_text("mode_driving", lang): "driving",
                 get_text("mode_walking", lang): "walking",
-                get_text("mode_bicycling", lang): "bicycling"
+                get_text("mode_bicycling", lang): "cycling"
             }
             selected_mode_label = st.selectbox(label_transport, list(travel_modes.keys()))
             selected_mode_api = travel_modes[selected_mode_label]
