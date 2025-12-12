@@ -97,7 +97,7 @@ def render_results_list(results, mode):
     center_coords = st.session_state.get("center_coords")
 
     for idx, r in enumerate(results):
-        is_selected = (st.session_state.selected_place_id == r['id'])
+        is_selected = (str(st.session_state.get('selected_place_id')) == str(r['id']))
 
         # --- LOGIC TÍNH KHOẢNG CÁCH & THỜI GIAN TRONG LIST ---
         if is_selected and center_coords:
@@ -226,7 +226,7 @@ def render_results_list(results, mode):
         )
 
         def select_place(pid=r['id']):
-            st.session_state.selected_place_id = pid
+            st.session_state.selected_place_id = str(pid)
 
         btn_label = get_text("go_to_place_btn", lang).format(idx+1)
         st.button(btn_label, key=f"btn_{r['id']}", on_click=select_place, use_container_width=True)
@@ -239,10 +239,10 @@ def render_map(center_lat, center_lon, results, mode):
     m = folium.Map(location=[center_lat, center_lon], zoom_start=15)
     folium.Marker([center_lat, center_lon], icon=folium.Icon(color='red', icon='user', prefix='fa'), popup=get_text("you", lang)).add_to(m)
     
-    selected_place = next((x for x in results if x['id'] == st.session_state.selected_place_id), None)
+    selected_place = next((x for x in results if str(x['id']) == str(st.session_state.get('selected_place_id'))), None)
     
     for r in results:
-        is_selected = (selected_place and r['id'] == selected_place['id'])
+        is_selected = (selected_place and str(r['id']) == str(selected_place['id']))
         color = 'green' if is_selected else 'blue'
         
         popup_html = f"""
@@ -288,6 +288,10 @@ def render_map(center_lat, center_lon, results, mode):
         else:
             display_dist_m = selected_place['distance_sort']
             display_time_min = calculate_time_minutes(display_dist_m, mode)
+
+        # If we have a route but it's approximate (fallback), show a notice
+        if steps_to_display and isinstance(steps_to_display, list) and steps_to_display[0].get('approximate'):
+            st.info(get_text('real_route_unavailable', lang))
     
     st_folium(m, width="100%", height=600)
     

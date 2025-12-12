@@ -37,7 +37,7 @@ BASE_TEXTS = {
     "chip_side_dish": "Món này ăn kèm với gì?",
     "chip_cheapest": "Tìm quán rẻ nhất",
     "chat_placeholder": "Hỏi Foodie Guide về ẩm thực",
-    "no_api_key": "⚠️ Vui lòng thiết lập GEMINI_API_KEY trong Streamlit Secrets.",
+    "no_api_key": "⚠️ Vui lòng thiết lập GOOGLE_AI_API_KEY trong Streamlit Secrets.",
     "error_msg": "Đã xảy ra lỗi: {}",
     "transport_mode": "Phương tiện",
     "mode_driving": "🚗 Xe máy/Ô tô",
@@ -54,6 +54,8 @@ BASE_TEXTS = {
     "driving_dist": "Khoảng cách lái xe",
     "est_time": "Thời gian dự kiến",
     "step_continue_dist": "Đi tiếp {}m",
+    "suggestion_hint": "Click vào gợi ý bên dưới hoặc nhập câu hỏi của bạn",
+    "please_config_api": "Vui lòng cấu hình GOOGLE_AI_API_KEY trong .streamlit/secrets để sử dụng tính năng này.",
     
     # Navigation Instructions (Các câu lệnh chỉ đường)
     "nav_left": "Rẽ trái vào {}",
@@ -83,4 +85,6 @@ BASE_TEXTS = {
     "home_feature_ai_desc": "Chatbot hỗ trợ 24/7",
     "home_suggestion_label": "🔥 Gợi ý:",
     "home_suggestion_list": "Phở, Bánh mì, Cơm tấm, Pizza, Cà phê, Trà sữa"
+    ,
+    "real_route_unavailable": "Không lấy được lộ trình thực tế. Hiện hiển thị khoảng cách ước lượng."
 }
