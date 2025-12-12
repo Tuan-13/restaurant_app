@@ -69,5 +69,18 @@ BASE_TEXTS = {
     "nav_roundabout": "Vào vòng xuyến, ra lối thứ {} hướng {}",
     "nav_fork": "Tại ngã rẽ, đi về phía {} ({})",
     "nav_end_of_road": "Đi hết đường, rẽ về hướng {} vào {}",
-    "nav_default": "Đi tiếp ({})"
+    "nav_default": "Đi tiếp ({})",
+    
+    # --- [THÊM MỚI] CÁC TỪ KHÓA CHO TRANG CHỦ & HEADER ---
+    "header_question": "Bạn muốn ăn gì hôm nay?",
+    "home_feature_nearby": "Tìm quán gần nhất",
+    "home_feature_nearby_desc": "Dựa trên vị trí GPS",
+    "home_feature_route": "Chỉ đường chi tiết",
+    "home_feature_route_desc": "Đi bộ, xe máy, ô tô",
+    "home_feature_budget": "Lọc theo ngân sách",
+    "home_feature_budget_desc": "Bình dân đến cao cấp",
+    "home_feature_ai": "AI tư vấn",
+    "home_feature_ai_desc": "Chatbot hỗ trợ 24/7",
+    "home_suggestion_label": "🔥 Gợi ý:",
+    "home_suggestion_list": "Phở, Bánh mì, Cơm tấm, Pizza, Cà phê, Trà sữa"
 }

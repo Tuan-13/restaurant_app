@@ -11,7 +11,7 @@ from views.map_logic import process_results
 def render_map_tab(lang):
     # --- GIAO DIỆN TÌM KIẾM ---
     # Search header
-    st.markdown("""
+    st.markdown(f"""
     <div style="
         text-align: center;
         margin-bottom: 1rem;
@@ -20,7 +20,7 @@ def render_map_tab(lang):
             font-size: 1rem;
             color: #64748b;
             font-weight: 500;
-        ">Bạn muốn ăn gì hôm nay?</div>
+        ">{get_text("header_question", lang)}</div>
     </div>
     """, unsafe_allow_html=True)
 

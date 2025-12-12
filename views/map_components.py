@@ -332,6 +332,7 @@ def render_home_page():
     """Hiển thị trang chủ khi chưa tìm kiếm - compact version"""
     # Lấy trạng thái dark mode
     is_dark = st.session_state.get("dark_mode", False)
+    lang = st.session_state.get("language", "vi")
 
     # Card style chung - glassmorphism với dark mode support
     if is_dark:
@@ -372,8 +373,8 @@ def render_home_page():
         st.markdown(
             f'''<div style="{card_style}">
                 <div style="font-size: 1.75rem; margin-bottom: 0.4rem;">📍</div>
-                <div style="font-weight: 600; color: {title_color}; font-size: 0.9rem;">Tìm quán gần nhất</div>
-                <div style="font-size: 0.75rem; color: {subtitle_color};">Dựa trên vị trí GPS</div>
+                <div style="font-weight: 600; color: {title_color}; font-size: 0.9rem;">{get_text("home_feature_nearby", lang)}</div>
+                <div style="font-size: 0.75rem; color: {subtitle_color};">{get_text("home_feature_nearby_desc", lang)}</div>
             </div>''',
             unsafe_allow_html=True
         )
@@ -382,8 +383,8 @@ def render_home_page():
         st.markdown(
             f'''<div style="{card_style}">
                 <div style="font-size: 1.75rem; margin-bottom: 0.4rem;">🗺️</div>
-                <div style="font-weight: 600; color: {title_color}; font-size: 0.9rem;">Chỉ đường chi tiết</div>
-                <div style="font-size: 0.75rem; color: {subtitle_color};">Đi bộ, xe máy, ô tô</div>
+                <div style="font-weight: 600; color: {title_color}; font-size: 0.9rem;">{get_text("home_feature_route", lang)}</div>
+                <div style="font-size: 0.75rem; color: {subtitle_color};">{get_text("home_feature_route_desc", lang)}</div>
             </div>''',
             unsafe_allow_html=True
         )
@@ -392,8 +393,8 @@ def render_home_page():
         st.markdown(
             f'''<div style="{card_style}">
                 <div style="font-size: 1.75rem; margin-bottom: 0.4rem;">💰</div>
-                <div style="font-weight: 600; color: {title_color}; font-size: 0.9rem;">Lọc theo ngân sách</div>
-                <div style="font-size: 0.75rem; color: {subtitle_color};">Bình dân đến cao cấp</div>
+                <div style="font-weight: 600; color: {title_color}; font-size: 0.9rem;">{get_text("home_feature_budget", lang)}</div>
+                <div style="font-size: 0.75rem; color: {subtitle_color};">{get_text("home_feature_budget_desc", lang)}</div>
             </div>''',
             unsafe_allow_html=True
         )
@@ -402,8 +403,8 @@ def render_home_page():
         st.markdown(
             f'''<div style="{card_style}">
                 <div style="font-size: 1.75rem; margin-bottom: 0.4rem;">🤖</div>
-                <div style="font-weight: 600; color: {title_color}; font-size: 0.9rem;">AI tư vấn</div>
-                <div style="font-size: 0.75rem; color: {subtitle_color};">Chatbot hỗ trợ 24/7</div>
+                <div style="font-weight: 600; color: {title_color}; font-size: 0.9rem;">{get_text("home_feature_ai", lang)}</div>
+                <div style="font-size: 0.75rem; color: {subtitle_color};">{get_text("home_feature_ai_desc", lang)}</div>
             </div>''',
             unsafe_allow_html=True
         )
@@ -420,8 +421,8 @@ def render_home_page():
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
             text-align: center;
         ">
-            <span style="color: #ea580c; font-weight: 600;">🔥 Gợi ý:</span>
-            <span style="color: {suggestion_text_color};"> Phở, Bánh mì, Cơm tấm, Pizza, Cà phê, Trà sữa</span>
+            <span style="color: #ea580c; font-weight: 600;">{get_text("home_suggestion_label", lang)}</span>
+            <span style="color: {suggestion_text_color};"> {get_text("home_suggestion_list", lang)}</span>
         </div>''',
         unsafe_allow_html=True
     )
